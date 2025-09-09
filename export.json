@@ -1,0 +1,41 @@
+{
+  "scopes": {
+    "tenant": [
+      "base:app:copy",
+      "base:app:create",
+      "base:app:read",
+      "base:app:update",
+      "base:collaborator:create",
+      "base:collaborator:delete",
+      "base:collaborator:read",
+      "base:dashboard:copy",
+      "base:dashboard:read",
+      "base:field:create",
+      "base:field:delete",
+      "base:field:read",
+      "base:field:update",
+      "base:form:read",
+      "base:form:update",
+      "base:record:create",
+      "base:record:delete",
+      "base:record:read",
+      "base:record:retrieve",
+      "base:record:update",
+      "base:role:create",
+      "base:role:delete",
+      "base:role:read",
+      "base:role:update",
+      "base:table:create",
+      "base:table:delete",
+      "base:table:read",
+      "base:table:update",
+      "base:view:read",
+      "base:view:write_only",
+      "docx:document:readonly",
+      "im:message:send_as_bot"
+    ],
+    "user": [
+      "docx:document:readonly"
+    ]
+  }
+}

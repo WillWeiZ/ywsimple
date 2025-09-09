@@ -1,0 +1,78 @@
+name: 同步股票数据到飞书
+
+on:
+  # 定时任务：每个工作日中午12点和下午5点执行（北京时间）
+  schedule:
+    - cron: '0 4 * * 1-5'   # 每个工作日中午12点（UTC+8 = UTC 4点）
+    - cron: '0 9 * * 1-5'   # 每个工作日下午5点（UTC+8 = UTC 9点）
+  
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      clear_existing_data:
+        description: '是否清空现有数据'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  sync-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install lark_oapi
+        
+    - name: 创建配置文件
+      run: |
+        cat > feishu_config.py << EOF
+        import os
+        
+        # 从环境变量读取配置
+        APP_ID = os.getenv('FEISHU_APP_ID')
+        APP_SECRET = os.getenv('FEISHU_APP_SECRET')
+        BASE_URL = os.getenv('FEISHU_BASE_URL')
+        TABLE_ID = os.getenv('FEISHU_TABLE_ID')
+        EOF
+      
+    - name: 执行完整数据同步
+      run: |
+        echo "开始执行完整的股票数据同步流程..."
+        python complete_sync.py
+        echo "数据同步流程完成"
+      env:
+        FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+        FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+        FEISHU_BASE_URL: ${{ secrets.FEISHU_BASE_URL }}
+        FEISHU_TABLE_ID: ${{ secrets.FEISHU_TABLE_ID }}
+        FEISHU_USER_TOKEN: ${{ secrets.FEISHU_USER_TOKEN }}
+        PYTHONPATH: .
+    
+    - name: 上传同步日志
+      if: always()  # 无论成功还是失败都上传日志
+      uses: actions/upload-artifact@v3
+      with:
+        name: sync-logs-${{ github.run_number }}
+        path: |
+          complete_sync.log
+          *.xlsx
+          data/*.csv
+        retention-days: 7
+    
+    - name: 发送通知（失败时）
+      if: failure()
+      run: |
+        echo "同步失败，请检查日志"
+        # 这里可以添加邮件通知或者其他通知方式

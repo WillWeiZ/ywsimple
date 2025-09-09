@@ -1,0 +1,11 @@
+{
+  "scopes": {
+    "tenant": [
+      "im:message:send_as_bot",
+      "docx:document:readonly"
+    ],
+    "user": [
+      "docx:document:readonly"
+    ]
+  }
+}
